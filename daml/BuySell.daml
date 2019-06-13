@@ -1,0 +1,39 @@
+-- Copyright (c) 2019, Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
+daml 1.2
+module BuySell where
+
+template Buy
+  with
+    sender: Party
+    receiver: Party
+    count: Int
+  where
+    signatory sender
+    observer receiver
+
+    controller receiver can
+      ReplySell : ()
+        do
+          if count >= 3 then return ()
+          else do
+            create Sell with sender = receiver; receiver = sender; count = count + 1
+            return ()
+
+template Sell
+  with
+    sender: Party
+    receiver: Party
+    count: Int
+  where
+    signatory sender
+    observer receiver
+
+    controller receiver can
+      ReplyBuy : ()
+        do
+          if count >= 3 then return ()
+          else do
+            create Buy with sender = receiver; receiver = sender; count = count + 1
+            return ()
